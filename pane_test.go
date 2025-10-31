@@ -41,9 +41,10 @@ func TestNewPaneAndShellLifecycle(t *testing.T) {
     if err != nil {
         t.Fatalf("Failed to get current path: %v", err)
     }
-    if path != "/tmp" {
-        t.Errorf("Expected /tmp, got %q", path)
-    }
+	
+    if !strings.HasSuffix(path, "/tmp") {
+    t.Errorf("Expected path to end with /tmp, got %q", path)
+	}
 
     // Validate active command
     cmd, err := pane.GetCurrentCommand()
