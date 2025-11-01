@@ -42,7 +42,8 @@ func (wm *WindowManager) GetPane(paneID string) (*PaneManager, bool) {
 // TerminateWindow cleans up all panes in the window.
 func (wm *WindowManager) TerminateWindow() {
 	for paneID := range wm.Panes {
-		wm.Panes[paneID].TerminatePane()
+		wm.Panes[paneID].TerminatePane(2 * time.Second)
+		fmt.Printf("🧹 Pane terminated: %s in window %s\n", paneID, wm.ID)
 		delete(wm.Panes, paneID)
 	}
 	fmt.Printf("🧹 Window terminated: %s\n", wm.ID)

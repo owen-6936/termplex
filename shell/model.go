@@ -1,15 +1,24 @@
 package shell
 
 import (
+	"bytes"
+	"io"
+	"os/exec"
+	"sync"
 	"time"
 )
 
-// ShellSession represents a shell process (bash, python, deepseek, etc.).
-// It carries metadata for modality, environment, and lifecycle tracking.
+// ShellSession represents an active, managed shell process.
+// It holds references to the process's I/O streams and buffers for capturing output.
 type ShellSession struct {
-	ID          string            // Unique shell ID
-	Env         string            // Environment name (e.g. "bash", "deepseek-r1")
-	Interactive bool              // Whether shell is interactive
-	StartedAt   time.Time         // Timestamp of shell start
-	Tags        map[string]string // Optional metadata (e.g. model, task, owner)
+	ID          string         // Unique identifier for the session.
+	Cmd         *exec.Cmd      // The underlying command process.
+	Stdin       io.WriteCloser // Pipe for writing to the shell's standard input.
+	Stdout      io.ReadCloser  // Pipe for reading from the shell's standard output.
+	Stderr      io.ReadCloser  // Pipe for reading from the shell's standard error.
+	StartedAt   time.Time      // Timestamp of when the session was created.
+	Interactive bool           // Tracks if the shell is interactive.
+	OutputBuf   bytes.Buffer   // Buffer to capture stdout.
+	StderrBuf   bytes.Buffer   // Buffer to capture stderr.
+	mu          sync.Mutex     // Mutex to protect concurrent access to session buffers.
 }

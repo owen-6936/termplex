@@ -40,10 +40,12 @@ func (sm *ShellManager) SpawnShell(env string, interactive bool, tags map[string
 	shellID := uuid.New().String()
 	newShell := &ShellSession{
 		ID:          shellID,
-		Env:         env,
-		Interactive: interactive,
 		StartedAt:   time.Now(),
-		Tags:        tags,
+		Interactive: interactive,
+	}
+
+	if interactive {
+		sm.Shells[shellID] = newShell
 	}
 
 	sm.Shells[shellID] = newShell

@@ -1,5 +1,17 @@
 # 📜 Termplex Functional Changelog
 
+## 📦 Architecture & Core Packages
+
+- **`shell` Package**:
+  - **Introduced a new, stateless `shell` package** for low-level process management, decoupling it from pane/window abstractions.
+  - **`ShellSession`**: A self-contained struct representing a managed OS process with its own `exec.Cmd`, I/O pipes, and output buffers.
+  - **`StartReading`**: Automatically captures `stdout` and `stderr` into the session's internal buffers upon creation.
+  - **`SendCommandAndWait`**: Provides reliable synchronous command execution with automatic UUID-based delimiter management.
+  - **`Close`**: Implements a robust graceful shutdown with a configurable grace period and a force-kill fallback mechanism.
+  - **Unit Tests**: Comprehensive, isolated test suite ensures reliability of the process lifecycle, I/O, and termination logic.
+
+---
+
 ## 🧱 Core Primitives
 
 - **`RunTmux(args...)`**: Raw command executor with stderr capture and error wrapping

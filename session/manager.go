@@ -49,6 +49,27 @@ func (sm *SessionManager) CreateSession(name string, tags map[string]string) (st
 	return id, nil
 }
 
+// AddWindow registers a new window in a session.
+func (sm *SessionManager) AddWindow(sessionID string, name string, tags map[string]string) (string, error) {
+	session, exists := sm.Sessions[sessionID]
+	if !exists {
+		return "", errors.New("session not found")
+	}
+
+	if len(session.WindowRefs) >= sm.MaxWindowsPerSession {
+		return "", errors.New("session window limit reached")
+	}
+
+	windowID := uuid.New().String()
+	if _, exists := sm.Windows[windowID]; exists {
+		return "", errors.New("window ID collision")
+	}
+
+	sm.Windows[windowID] = window.NewWindowManager(name, tags)
+	session.WindowRefs[windowID] = true
+	return windowID, nil
+}
+
 // HasSession checks if a session exists.
 func (sm *SessionManager) HasSession(id string) bool {
 	_, exists := sm.Sessions[id]
@@ -69,6 +90,7 @@ func (sm *SessionManager) TerminateSession(id string) error {
 	}
 
 	for windowID := range session.WindowRefs {
+		sm.Windows[windowID].TerminateWindow()
 		delete(sm.Windows, windowID)
 	}
 
