@@ -9,23 +9,18 @@ import (
 	"github.com/owen-6936/termplex/window"
 )
 
-type WindowManager = window.WindowManager
-
-// ShellSession represents a top-level orchestration unit.
-// It owns windows, tracks creation metadata, and supports tagging for contributor clarity.
-
 // SessionManager controls session lifecycle and enforces window limits.
 type SessionManager struct {
-	Sessions             map[string]*ShellSession
-	Windows              map[string]*WindowManager
+	Sessions             map[string]*Session
+	Windows              map[string]*window.WindowManager
 	MaxWindowsPerSession int
 }
 
 // NewSessionManager initializes a new SessionManager with a window limit.
 func NewSessionManager(maxWindows int) *SessionManager {
 	return &SessionManager{
-		Sessions:             make(map[string]*ShellSession),
-		Windows:              make(map[string]*WindowManager),
+		Sessions:             make(map[string]*Session),
+		Windows:              make(map[string]*window.WindowManager),
 		MaxWindowsPerSession: maxWindows,
 	}
 }
@@ -37,7 +32,7 @@ func (sm *SessionManager) CreateSession(name string, tags map[string]string) (st
 		return "", errors.New("session ID collision")
 	}
 
-	sm.Sessions[id] = &ShellSession{
+	sm.Sessions[id] = &Session{
 		ID:         id,
 		Name:       name,
 		CreatedAt:  time.Now(),
@@ -77,7 +72,7 @@ func (sm *SessionManager) HasSession(id string) bool {
 }
 
 // GetSession retrieves a session by ID.
-func (sm *SessionManager) GetSession(id string) (*ShellSession, bool) {
+func (sm *SessionManager) GetSession(id string) (*Session, bool) {
 	session, exists := sm.Sessions[id]
 	return session, exists
 }

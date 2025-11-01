@@ -2,9 +2,9 @@ package session
 
 import "time"
 
-// ShellSession represents a top-level orchestration unit.
+// Session represents a top-level orchestration unit, like a workspace or project.
 // It owns windows, tracks creation metadata, and supports tagging for contributor clarity.
-type ShellSession struct {
+type Session struct {
 	ID         string            // Unique session ID
 	Name       string            // Human-readable name (e.g. "LLM Session")
 	CreatedAt  time.Time         // Timestamp of session creation

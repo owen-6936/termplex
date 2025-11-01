@@ -1,5 +1,15 @@
 # 📜 Termplex Functional Changelog
 
+## ✨ Core Architecture Complete
+
+- **`SessionManager`**: Implemented top-level manager for creating and terminating orchestration sessions.
+- **`WindowManager`**: Manages collections of panes within a session.
+- **`PaneManager`**: Manages shell processes within a single pane, enforcing the "one interactive shell" rule and providing a multiplexed `OutputChan` for all I/O.
+- **End-to-End Testing**: All manager layers (`session`, `window`, `pane`) now have isolated unit tests to ensure correctness and stability.
+- **Architectural Demo**: Added a `main.go` file that demonstrates the full, end-to-end flow of the architecture, from session creation to termination.
+
+---
+
 ## 📦 Architecture & Core Packages
 
 - **`shell` Package**:

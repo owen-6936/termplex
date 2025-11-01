@@ -41,7 +41,14 @@ func (wm *WindowManager) GetPane(paneID string) (*PaneManager, bool) {
 
 // TerminateWindow cleans up all panes in the window.
 func (wm *WindowManager) TerminateWindow() {
-	for paneID := range wm.Panes {
+	// Create a slice of pane IDs to iterate over, as deleting from a map
+	// while iterating over it is not safe.
+	paneIDs := make([]string, 0, len(wm.Panes))
+	for id := range wm.Panes {
+		paneIDs = append(paneIDs, id)
+	}
+
+	for _, paneID := range paneIDs {
 		wm.Panes[paneID].TerminatePane(2 * time.Second)
 		fmt.Printf("🧹 Pane terminated: %s in window %s\n", paneID, wm.ID)
 		delete(wm.Panes, paneID)

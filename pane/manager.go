@@ -1,6 +1,7 @@
 package pane
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os/exec"
@@ -15,7 +16,9 @@ func NewPaneManager(paneID string) *PaneManager {
 		ID:                   paneID,
 		CreatedAt:            time.Now(),
 		Tags:                 make(map[string]string),
-		NonInteractiveShells: []*shell.ShellSession{},
+		NonInteractiveShells: make([]*shell.ShellSession, 0),
+		OutputChan:           make(chan PaneOutput, 100), // Buffered channel
+		closeChan:            make(chan struct{}),
 	}
 }
 
@@ -49,6 +52,10 @@ func (pm *PaneManager) SpawnShell(interactive bool, command ...string) (*shell.S
 	}
 
 	if err := cmd.Start(); err != nil {
+		// If starting the command fails, ensure we close the pipes to prevent resource leaks.
+		_ = stdin.Close()
+		_ = stdout.Close()
+		_ = stderr.Close()
 		return nil, fmt.Errorf("failed to start command %v: %w", command, err)
 	}
 
@@ -63,8 +70,31 @@ func (pm *PaneManager) SpawnShell(interactive bool, command ...string) (*shell.S
 		Interactive: interactive,
 	}
 
-	// Automatically start reading from the shell's stdout and stderr pipes.
-	newShell.StartReading(newShell.OutputHandler, newShell.ErrorOutputHandler)
+	// Define custom handlers that forward output to the pane's multiplexed channel.
+	stdoutHandler := func(output []byte) {
+		// First, call the default handler to buffer output locally on the shell.
+		newShell.OutputHandler(output)
+
+		// Then, send the output to the pane's combined stream.
+		select {
+		case pm.OutputChan <- PaneOutput{ShellID: newShell.ID, Timestamp: time.Now(), Data: bytes.Clone(output)}:
+		case <-pm.closeChan: // Avoid blocking if the pane is terminated.
+		}
+	}
+
+	stderrHandler := func(output []byte) {
+		// Call the default handler to buffer stderr locally.
+		newShell.ErrorOutputHandler(output)
+
+		// Send to the combined stream, marked as stderr.
+		select {
+		case pm.OutputChan <- PaneOutput{ShellID: newShell.ID, Timestamp: time.Now(), Data: bytes.Clone(output), IsStderr: true}:
+		case <-pm.closeChan:
+		}
+	}
+
+	// Start reading from the shell's pipes using our custom handlers.
+	newShell.StartReading(stdoutHandler, stderrHandler)
 
 	if interactive {
 		pm.InteractiveShell = newShell
@@ -101,12 +131,20 @@ func (pm *PaneManager) TerminateShell(shellID string, gracePeriod time.Duration)
 
 // TerminatePane cleans up all shells in the pane by gracefully shutting them down.
 func (pm *PaneManager) TerminatePane(gracePeriod time.Duration) {
+	// Signal to all forwarding handlers that they should stop sending to OutputChan.
+	close(pm.closeChan)
+
+	// Terminate the interactive shell if it exists.
 	if pm.InteractiveShell != nil {
 		_, _ = pm.TerminateShell(pm.InteractiveShell.ID, gracePeriod)
-		pm.InteractiveShell = nil
 	}
-	for _, s := range pm.NonInteractiveShells {
-		_, _ = pm.TerminateShell(s.ID, gracePeriod)
+
+	// Terminate non-interactive shells by iterating backward to safely remove elements.
+	for i := len(pm.NonInteractiveShells) - 1; i >= 0; i-- {
+		shell := pm.NonInteractiveShells[i]
+		_, _ = pm.TerminateShell(shell.ID, gracePeriod)
 	}
-	pm.NonInteractiveShells = []*shell.ShellSession{}
+
+	// Close the main output channel to signal the end of the stream.
+	close(pm.OutputChan)
 }

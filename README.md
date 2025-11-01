@@ -1,9 +1,9 @@
 # Termplex: tmux Orchestration Core
 
-[!Build Status](https://github.com/owen-6936/termplex/actions/workflows/ci.yml)
-[!Go Report Card](https://goreportcard.com/report/github.com/owen-6936/termplex)
-[!GoDoc](https://godoc.org/github.com/owen-6936/termplex)
-[!License: MIT](https://opensource.org/licenses/MIT)
+[![Build Status](https://github.com/owen-6936/termplex/actions/workflows/ci.yml/badge.svg)](https://github.com/owen-6936/termplex/actions/workflows/ci.yml)
+[![Go Report Card](https://goreportcard.com/badge/github.com/owen-6936/termplex)](https://goreportcard.com/report/github.com/owen-6936/termplex)
+[![GoDoc](https://godoc.org/github.com/owen-6936/termplex?status.svg)](https://godoc.org/github.com/owen-6936/termplex)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 **Termplex** is a Go-based terminal orchestration engine for managing multiplexed, process-aware terminal environments. It provides clean, testable primitives for creating, interacting with, and terminating shell sessions.
 
@@ -30,14 +30,16 @@
 
 This design separates the "what" (the state of windows and panes) from the "how" (the underlying process management), allowing for flexible and testable orchestration.
 
+![Termplex Architecture Diagram](termplex-design.svg)
+
 ---
 
 ## 🚀 Getting Started
 
-Install the package:
+To see the architecture in action, you can run the demonstration file:
 
 ```bash
-go get github.com/nexicore/termplex/tmux
+go run ./main.go
 ```
 
 Import it in your Go project:
