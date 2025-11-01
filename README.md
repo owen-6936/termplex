@@ -1,7 +1,7 @@
 # Termplex: tmux Orchestration Core
 
 [![Build Status](https://github.com/owen-6936/termplex/actions/workflows/ci.yml/badge.svg)](https://github.com/owen-6936/termplex/actions/workflows/ci.yml)
-[![Go Report Card](https://goreportcard.com/badge/github.com/owen-6936/termplex)](https://goreportcard.com/report/github.com/owen-6936/termplex)
+![Go Report Card](https://goreportcard.com/badge/github.com/owen-6936/termplex?t=1)
 [![GoDoc](https://godoc.org/github.com/owen-6936/termplex?status.svg)](https://godoc.org/github.com/owen-6936/termplex)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 

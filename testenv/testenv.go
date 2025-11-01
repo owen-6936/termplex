@@ -4,6 +4,9 @@ import (
 	"os"
 	"os/exec"
 	"testing"
+
+	"github.com/owen-6936/termplex/assert"
+	"github.com/owen-6936/termplex/session"
 )
 
 // IsInCI checks if the test is running in a common Continuous Integration environment.
@@ -23,4 +26,27 @@ func SkipIfNoTmux(t *testing.T) {
 	if !isTmuxAvailable() {
 		t.Skip("tmux command not found, skipping integration test")
 	}
+}
+
+// NewSessionFromManifest provides a reproducible test harness for creating a session
+// from a manifest file. It handles session creation, error checking, and automatic
+// teardown via t.Cleanup. It returns the session manager and the ID of the created session.
+func NewSessionFromManifest(t *testing.T, manifestPath string) (*session.SessionManager, string) {
+	t.Helper()
+
+	// 1. Create a new SessionManager.
+	sm := session.NewSessionManager(5) // Default window limit for tests.
+
+	// 2. Create the session from the manifest.
+	sessionID, err := sm.CreateSessionFromManifest(manifestPath)
+	assert.NoError(t, err)
+	assert.True(t, sessionID != "", "CreateSessionFromManifest returned an empty session ID")
+
+	// 3. Register a cleanup function to terminate the session after the test.
+	t.Cleanup(func() {
+		err := sm.TerminateSession(sessionID)
+		assert.NoError(t, err)
+	})
+
+	return sm, sessionID
 }

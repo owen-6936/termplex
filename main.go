@@ -36,9 +36,7 @@ func main() {
 	pane, _ := wm.GetPane(paneID)
 
 	// 5. Start a goroutine to consume all multiplexed output from the pane
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
+	wg.Go(func() {
 		fmt.Println("\n--- 🎧 Listening for all output from Pane ---")
 		for output := range pane.OutputChan {
 			streamType := "STDOUT"
@@ -48,7 +46,7 @@ func main() {
 			fmt.Printf("[Pane Output | Shell: ...%s | %s]: %s", output.ShellID[len(output.ShellID)-6:], streamType, string(output.Data))
 		}
 		fmt.Println("--- 🛑 Pane output stream closed ---")
-	}()
+	})
 
 	// 6. Spawn shells within the Pane
 	// Spawn an interactive shell
