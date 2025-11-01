@@ -3,10 +3,10 @@ package shell_test
 import (
 	"fmt"
 	"os/exec"
-	"strings"
 	"testing"
 	"time"
 
+	"github.com/owen-6936/termplex/assert"
 	"github.com/owen-6936/termplex/shell"
 )
 
@@ -69,15 +69,11 @@ func TestShellLifecycleAndOutputBuffering(t *testing.T) {
 
 	// Check if stdout was captured
 	stdout := session.OutputBuf.String()
-	if !strings.Contains(stdout, "hello stdout") {
-		t.Errorf("Expected stdout buffer to contain 'hello stdout', but got: %q", stdout)
-	}
+	assert.Contains(t, stdout, "hello stdout")
 
 	// Check if stderr was captured
 	stderr := session.StderrBuf.String()
-	if !strings.Contains(stderr, "hello stderr") {
-		t.Errorf("Expected stderr buffer to contain 'hello stderr', but got: %q", stderr)
-	}
+	assert.Contains(t, stderr, "hello stderr")
 }
 
 func TestSendCommandAndWait(t *testing.T) {
@@ -90,19 +86,28 @@ func TestSendCommandAndWait(t *testing.T) {
 	// Send a command and wait for the response
 	testPhrase := "this is a synchronous test"
 	output, err := session.SendCommandAndWait("echo '" + testPhrase + "'")
-	if err != nil {
-		t.Fatalf("SendCommandAndWait failed: %v", err)
-	}
+	assert.NoError(t, err)
 
 	// The output should contain our phrase, trimmed of whitespace and shell prompts
-	if !strings.Contains(output, testPhrase) {
-		t.Errorf("Expected output to contain %q, but got: %q", testPhrase, output)
-	}
+	assert.Contains(t, output, testPhrase)
 
 	// Verify the output was also captured in the main buffer
 	fullOutput := session.OutputBuf.String()
-	if !strings.Contains(fullOutput, testPhrase) {
-		t.Errorf("Expected main buffer to contain %q after SendCommandAndWait, but it didn't", testPhrase)
+	assert.Contains(t, fullOutput, testPhrase)
+}
+
+func TestSendCommandAndWait_NoPromptLeakage(t *testing.T) {
+	// This test ensures that the output from SendCommandAndWait does not contain
+	// the shell prompt, which can include ANSI escape codes.
+	session := newTestShell(t, "bash", "-i")
+	time.Sleep(200 * time.Millisecond) // Allow shell to initialize
+
+	output, err := session.SendCommandAndWait("echo -n 'clean output'")
+	assert.NoError(t, err)
+
+	// Check that the output is exactly what we expect and nothing more.
+	if output != "clean output" {
+		t.Errorf("Expected output to be exactly 'clean output', but got %q", output)
 	}
 }
 
@@ -114,9 +119,7 @@ func TestShellCloseWithFallback(t *testing.T) {
 
 	// Wait for the "ready" signal to ensure the process is running
 	time.Sleep(200 * time.Millisecond)
-	if !strings.Contains(session.OutputBuf.String(), "ready") {
-		t.Fatal("Shell did not print 'ready' signal")
-	}
+	assert.Contains(t, session.OutputBuf.String(), "ready")
 
 	// Attempt to close the session with a very short grace period.
 	// This should fail gracefully and trigger the force-kill fallback.
@@ -126,16 +129,11 @@ func TestShellCloseWithFallback(t *testing.T) {
 	duration := time.Since(startTime)
 
 	// After a force-kill, Wait() returns an error. We expect this.
-	// If err is nil, it means the process exited cleanly before the kill, which is wrong.
-	if err == nil {
-		t.Errorf("Expected an error from Wait() after a forced kill, but got nil")
-	}
+	assert.True(t, err != nil, "Expected an error from Wait() after a forced kill, but got nil")
 
 	// The close operation should have taken longer than the grace period because
 	// it had to wait for the timeout before force-killing.
-	if duration < gracePeriod {
-		t.Errorf("The close operation finished too quickly (%v), suggesting the fallback was not triggered", duration)
-	}
+	assert.True(t, duration > gracePeriod, "The close operation finished too quickly (%v), suggesting the fallback was not triggered", duration)
 
 	t.Logf("Successfully triggered fallback termination for shell %s after %v", session.ID, duration)
 }

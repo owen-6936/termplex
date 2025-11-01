@@ -70,9 +70,12 @@ func (s *ShellSession) SendCommandAndWait(command string) (string, error) {
 	s.mu.Unlock()
 
 	delimiter := uuid.New().String()
-	fullCommand := fmt.Sprintf("%s\n%s\n", command, "echo "+delimiter)
+	// Use `echo -n` to prevent a trailing newline from the delimiter itself.
+	// Combine with the user's command using '&&' to run sequentially.
+	// This prevents an intermediate shell prompt from leaking into the output.
+	fullCommand := fmt.Sprintf("%s && echo -n %s", command, delimiter)
 
-	if err := s.SendCommand(fullCommand); err != nil {
+	if err := s.SendCommand(fullCommand + "\n"); err != nil {
 		return "", fmt.Errorf("failed to write command to session %s: %w", s.ID, err)
 	}
 
@@ -90,7 +93,9 @@ func (s *ShellSession) SendCommandAndWait(command string) (string, error) {
 			s.mu.Unlock()
 
 			if strings.Contains(output, delimiter) {
-				content := strings.Split(output, delimiter)[0]
+				// Split the output by the delimiter and return only what came before it.
+				// This cleanly separates the command's output from our delimiter.
+				content := strings.SplitN(output, delimiter, 2)[0]
 				return content, nil
 			}
 		}

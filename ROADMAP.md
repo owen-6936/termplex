@@ -14,14 +14,13 @@ This roadmap outlines the evolution of **Termplex** as a modular, clarity-first 
 - [x] `StartShell(target, path)`: seed shell in pane
 - [x] `GetPanePath(target)`: query working directory
 - [x] `CapturePane(target)`: capture visible buffer contents
-- [ ] `PipePane(target, path)`: stream pane output to file
 
 ---
 
 ## 🧠 Phase 2: Contributor Ecosystem
 
-- [ ] Functional changelog engine (replaces badge-based attribution)
-- [ ] Exported module tracker (name, params, usage)
+- [x] Exported module tracker (API Reference in `README.md`)
+- [ ] ~~Functional changelog engine~~ (Scrapped for now)
 - [ ] Cognitive milestone tagging (e.g. “Shell seeded”, “TTY isolated”)
 - [ ] Session manifest format (`.termplex.json`)
 - [ ] Reproducible test harnesses for CI environments
@@ -31,9 +30,9 @@ This roadmap outlines the evolution of **Termplex** as a modular, clarity-first 
 ## 🧪 Phase 3: Test & Debug Layer
 
 - [x] CI-safe test suite with seeded shell flows
-- [ ] `testenv.go`: guards for detached sessions and shell readiness
-- [ ] `debug.go`: trace tmux stderr and command logs
-- [ ] `assert.go`: test helpers for path, buffer, and process state
+- [x] `testenv.go`: guards for CI environment and `tmux` availability
+- [x] `debug.go`: trace `tmux` commands and stderr via `TERMPLEX_DEBUG=1`
+- [x] `assert.go`: test helpers for common assertions (`Contains`, `NoError`, etc.)
 
 ---
 
