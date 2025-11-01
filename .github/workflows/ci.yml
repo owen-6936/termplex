@@ -1,4 +1,6 @@
 name: Go Test Suite
+permissions:
+  contents: read
 
 on:
     push:
