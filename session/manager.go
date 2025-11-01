@@ -115,7 +115,7 @@ func (sm *SessionManager) CreateSessionFromManifest(filePath string) (string, er
 		if err != nil {
 			return "", err // Or handle error more gracefully
 		}
-		wm, _ := sm.Windows[windowID]
+		wm := sm.Windows[windowID]
 
 		// 3. Iterate over panes for each window.
 		for _, paneManifest := range winManifest.Panes {
