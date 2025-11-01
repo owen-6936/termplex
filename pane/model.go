@@ -19,13 +19,13 @@ type PaneOutput struct {
 // PaneManager represents a multitasking workspace within a window.
 // It can host one interactive shell and multiple non-interactive shells.
 type PaneManager struct {
-	ID                   string
-	CreatedAt            time.Time
-	InteractiveShell     *shell.ShellSession
-	NonInteractiveShells []*shell.ShellSession
-	Tags                 map[string]string // Optional metadata (e.g. task, env, owner)
-	tagsMu               sync.Mutex        // Mutex to protect the Tags map.
-	tagsCond             *sync.Cond        // Condition variable to signal tag changes.
-	OutputChan           chan PaneOutput   // A multiplexed stream of output from all shells in this pane.
-	closeChan            chan struct{}     // Signal to close the output channel and stop forwarding handlers.
+	ID               string
+	CreatedAt        time.Time
+	Shells           *shell.ShellManager // Each pane now has its own dedicated shell manager.
+	InteractiveShell *shell.ShellSession
+	Tags             map[string]string // Optional metadata (e.g. task, env, owner)
+	tagsMu           sync.Mutex        // Mutex to protect the Tags map.
+	tagsCond         *sync.Cond        // Condition variable to signal tag changes.
+	OutputChan       chan PaneOutput   // A multiplexed stream of output from all shells in this pane.
+	closeChan        chan struct{}     // Signal to close the output channel and stop forwarding handlers.
 }

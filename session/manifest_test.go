@@ -37,6 +37,6 @@ func TestCreateSessionFromManifest_Harness(t *testing.T) {
 	// A more detailed test could inspect the output buffers.
 	time.Sleep(200 * time.Millisecond) // Allow time for shells to spawn.
 	for _, pane := range wm.Panes {
-		assert.True(t, pane.InteractiveShell != nil || len(pane.NonInteractiveShells) > 0, "Expected pane %s to have at least one shell", pane.ID)
+		assert.True(t, pane.InteractiveShell != nil || len(pane.Shells.Shells) > 0, "Expected pane %s to have at least one shell", pane.ID)
 	}
 }
