@@ -58,7 +58,14 @@ func main() {
 	}
 
 	// Spawn a non-interactive background task
-	_, err = pane.SpawnShell(false, "bash", "-c", "echo 'Background task starting...'; sleep 1; echo 'Background task finished.'")
+	go func() {
+		_, err := pane.SpawnShell(false, "bash", "-c", "echo 'Background service starting...'; sleep 1; echo 'Background service is ready.'")
+		if err != nil {
+			fmt.Printf("Error spawning background service: %v\n", err)
+		}
+		// After the shell command finishes, tag the pane.
+		pane.AddTag("service-status", "ready")
+	}()
 	if err != nil {
 		panic(fmt.Sprintf("Failed to spawn background shell: %v", err))
 	}
@@ -71,8 +78,14 @@ func main() {
 	}
 	fmt.Printf("--- ⏹️  Received specific response: %s\n", output)
 
-	// Let background tasks run for a bit
-	time.Sleep(2 * time.Second)
+	// NEW: Wait for the background service to be ready before proceeding.
+	fmt.Println("\n--- ⏳ Waiting for background service to be ready ---")
+	err = pane.WaitForTag("service-status", "ready", 5*time.Second)
+	if err != nil {
+		fmt.Printf("Error while waiting for service: %v\n", err)
+	} else {
+		fmt.Println("--- ✅ Background service is ready! Proceeding. ---")
+	}
 
 	// 8. Terminate the entire session, which will clean up everything
 	fmt.Println("\n--- 🧹 Terminating entire session ---")
@@ -81,4 +94,8 @@ func main() {
 	// Wait for the output consumer goroutine to finish
 	wg.Wait()
 	fmt.Println("\n✅ Demo finished successfully.")
+
+	println("\n--- 🚀 Starting Termplex Architecture Demo from Manifest... ---")
+	println("")
+	sm.CreateSessionFromManifest("example.termplex.json")
 }

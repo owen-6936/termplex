@@ -1,5 +1,23 @@
 # 📜 Termplex Functional Changelog
 
+## 📄 Session Manifest Support
+
+- **Declarative Sessions**: Implemented support for `.termplex.json` manifest files, allowing entire sessions, windows, panes, and startup commands to be defined declaratively.
+- **`manifest` Package**: Created a new package to define the manifest structure (`model.go`) and parse the JSON files (`parser.go`).
+- **`session.CreateSessionFromManifest(filePath)`**: Added a new method to the `SessionManager` that reads a manifest and orchestrates the creation of all defined resources.
+- **Example Manifest**: Included `example.termplex.json` to demonstrate the format.
+- **Testing**: Added a test suite for the `manifest` parser to ensure it correctly handles valid files, missing files, and invalid JSON.
+
+---
+
+## 🧠 Cognitive Milestone Tagging
+
+- **`pane.AddTag(key, value)`**: Implemented a thread-safe method to add or update a tag on a `PaneManager`.
+- **`pane.WaitForTag(key, value, timeout)`**: Implemented a blocking method that efficiently waits for a specific tag to be set, using `sync.Cond` to avoid busy-looping. This allows different parts of an orchestration to synchronize based on application-defined milestones (e.g., waiting for a service to be "ready").
+- **Demo Update**: The `main.go` demo has been updated to showcase a real-world example of one shell waiting for a background service to signal its readiness via a tag.
+
+---
+
 ## 🚀 `tmux` Backend Implementation
 
 - **`tmux` Package**: Introduced a new `tmux` package to serve as a specific backend for the orchestration engine.

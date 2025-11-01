@@ -1,0 +1,39 @@
+{
+  "sessionName": "WebAppDev",
+  "sessionTags": {
+    "project": "termplex-demo"
+  },
+  "windows": [
+    {
+      "windowName": "Backend",
+      "windowTags": {
+        "service": "api"
+      },
+      "panes": [
+        {
+          "paneTags": {
+            "role": "api-server"
+          },
+          "startupShell": {
+            "interactive": true,
+            "command": ["bash", "-i"]
+          },
+          "startupCommands": [
+            "echo 'Starting API server... (simulated)'",
+            "go --version"
+          ]
+        },
+        {
+          "paneTags": {
+            "role": "database-logs"
+          },
+          "startupShell": {
+            "interactive": false,
+            "command": ["bash", "-c", "echo 'Tailing database logs...'; for i in {1..5}; do echo 'Log entry $i'; sleep 0.5; done"]
+          },
+          "startupCommands": []
+        }
+      ]
+    }
+  ]
+}

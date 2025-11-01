@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
+	"sync"
 	"time"
 
 	"github.com/owen-6936/termplex/shell"
@@ -12,7 +13,7 @@ import (
 
 // NewPaneManager initializes a new pane with a unique ID.
 func NewPaneManager(paneID string) *PaneManager {
-	return &PaneManager{
+	pm := &PaneManager{
 		ID:                   paneID,
 		CreatedAt:            time.Now(),
 		Tags:                 make(map[string]string), // A map is not a slice, so it remains.
@@ -20,6 +21,8 @@ func NewPaneManager(paneID string) *PaneManager {
 		OutputChan:           make(chan PaneOutput, 100), // Buffered channel
 		closeChan:            make(chan struct{}),
 	}
+	pm.tagsCond = sync.NewCond(&pm.tagsMu)
+	return pm
 }
 
 // CanSpawnInteractive checks if the pane is free for an interactive shell.
@@ -105,6 +108,47 @@ func (pm *PaneManager) SpawnShell(interactive bool, command ...string) (*shell.S
 	}
 
 	return newShell, nil
+}
+
+// AddTag safely adds or updates a tag on the pane and notifies any waiting listeners.
+func (pm *PaneManager) AddTag(key, value string) {
+	pm.tagsMu.Lock()
+	defer pm.tagsMu.Unlock()
+
+	fmt.Printf("MILESTONE: Pane %s tagged '%s' = '%s'\n", pm.ID, key, value)
+	pm.Tags[key] = value
+
+	// Wake up all goroutines waiting on a tag change.
+	pm.tagsCond.Broadcast()
+}
+
+// WaitForTag blocks until a specific tag has a specific value, or until the timeout is reached.
+func (pm *PaneManager) WaitForTag(key, value string, timeout time.Duration) error {
+	pm.tagsMu.Lock()
+	defer pm.tagsMu.Unlock()
+
+	// Channel to signal when the condition is met or timed out.
+	done := make(chan struct{})
+
+	go func() {
+		// This loop is the core of the waiting logic.
+		for pm.Tags[key] != value {
+			// cond.Wait() atomically unlocks the mutex and waits for a signal.
+			// When woken up, it re-locks the mutex before proceeding.
+			pm.tagsCond.Wait()
+		}
+		// The condition is met, close the channel to unblock the select.
+		close(done)
+	}()
+
+	select {
+	case <-done:
+		// The tag was found.
+		return nil
+	case <-time.After(timeout):
+		// The timeout was reached.
+		return fmt.Errorf("timed out waiting for tag '%s' = '%s' on pane %s", key, value, pm.ID)
+	}
 }
 
 // TerminateShell attempts a graceful shutdown of a specific shell session.
