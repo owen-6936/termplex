@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/owen-6936/termplex/manifest"
 	"github.com/owen-6936/termplex/window"
 )
 
@@ -92,4 +93,50 @@ func (sm *SessionManager) TerminateSession(id string) error {
 	delete(sm.Sessions, id)
 	fmt.Printf("🧹 Session terminated: %s\n", id)
 	return nil
+}
+
+// CreateSessionFromManifest reads a manifest file, parses it, and builds the entire
+// session, including all windows, panes, and startup shells/commands.
+func (sm *SessionManager) CreateSessionFromManifest(filePath string) (string, error) {
+	m, err := manifest.LoadFromFile(filePath)
+	if err != nil {
+		return "", fmt.Errorf("could not load session from manifest: %w", err)
+	}
+
+	// 1. Create the top-level session.
+	sessionID, err := sm.CreateSession(m.SessionName, m.SessionTags)
+	if err != nil {
+		return "", err
+	}
+
+	// 2. Iterate over windows defined in the manifest.
+	for _, winManifest := range m.Windows {
+		windowID, err := sm.AddWindow(sessionID, winManifest.WindowName, winManifest.WindowTags)
+		if err != nil {
+			return "", err // Or handle error more gracefully
+		}
+		wm, _ := sm.Windows[windowID]
+
+		// 3. Iterate over panes for each window.
+		for _, paneManifest := range winManifest.Panes {
+			paneID, err := wm.AddPane()
+			if err != nil {
+				return "", err
+			}
+			pane, _ := wm.GetPane(paneID)
+
+			// 4. Spawn the startup shell for the pane.
+			shell, err := pane.SpawnShell(paneManifest.StartupShell.Interactive, paneManifest.StartupShell.Command...)
+			if err != nil {
+				return "", err
+			}
+
+			// 5. Send any startup commands to the newly created shell.
+			for _, cmd := range paneManifest.StartupCommands {
+				_ = shell.SendCommand(cmd)
+			}
+		}
+	}
+
+	return sessionID, nil
 }

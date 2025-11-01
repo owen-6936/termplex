@@ -1,6 +1,7 @@
 package pane
 
 import (
+	"sync"
 	"time"
 
 	"github.com/owen-6936/termplex/shell"
@@ -23,6 +24,8 @@ type PaneManager struct {
 	InteractiveShell     *shell.ShellSession
 	NonInteractiveShells []*shell.ShellSession
 	Tags                 map[string]string // Optional metadata (e.g. task, env, owner)
+	tagsMu               sync.Mutex        // Mutex to protect the Tags map.
+	tagsCond             *sync.Cond        // Condition variable to signal tag changes.
 	OutputChan           chan PaneOutput   // A multiplexed stream of output from all shells in this pane.
 	closeChan            chan struct{}     // Signal to close the output channel and stop forwarding handlers.
 }

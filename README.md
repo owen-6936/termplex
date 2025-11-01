@@ -63,6 +63,7 @@ This section tracks the exported functions and methods for each core package, se
 - `(sm *SessionManager) AddWindow(sessionID, name, tags) (id, error)`: Adds a window to a specific session.
 - `(sm *SessionManager) GetSession(id) (*Session, bool)`: Retrieves a session by its ID.
 - `(sm *SessionManager) TerminateSession(id) error`: Terminates a session and all its child windows, panes, and shells.
+- `(sm *SessionManager) CreateSessionFromManifest(filePath) (id, error)`: Builds an entire session from a `.termplex.json` file.
 
 #### `window` Package
 
@@ -77,6 +78,8 @@ This section tracks the exported functions and methods for each core package, se
 - `(pm *PaneManager) SpawnShell(interactive, command) (*shell.ShellSession, error)`: Spawns a new OS process within the pane.
 - `(pm *PaneManager) TerminateShell(id, gracePeriod) (bool, error)`: Terminates a specific shell within the pane.
 - `(pm *PaneManager) TerminatePane(gracePeriod)`: Terminates the pane and all shells running within it.
+- `(pm *PaneManager) AddTag(key, value)`: Safely adds a tag to the pane to signal a milestone.
+- `(pm *PaneManager) WaitForTag(key, value, timeout) error`: Blocks until a specific tag is set, or a timeout occurs.
 
 #### `shell` Package
 
@@ -94,6 +97,55 @@ This section tracks the exported functions and methods for each core package, se
 - `(sm *SessionManager) KillSession() error`: Destroys the entire `tmux` session.
 - `(p *Pane) SendKeys(command) error`: Sends keystrokes to a specific `tmux` pane.
 - `(p *Pane) Capture() (output, error)`: Captures the visible text content of a `tmux` pane.
+
+---
+
+## 📄 Declarative Sessions with Manifests
+
+Termplex supports declarative session creation using a `.termplex.json` manifest file. This allows you to define an entire workspace—including windows, panes, and startup commands—in a single, version-controllable file.
+
+You can create a session from a manifest like this:
+
+```go
+sm := session.NewSessionManager(5)
+sessionID, err := sm.CreateSessionFromManifest("path/to/your/manifest.json")
+```
+
+### Example Manifest (`example.termplex.json`)
+
+```json
+{
+  "sessionName": "WebAppDev",
+  "sessionTags": {
+    "project": "termplex-demo"
+  },
+  "windows": [
+    {
+      "windowName": "Backend",
+      "panes": [
+        {
+          "paneTags": { "role": "api-server" },
+          "startupShell": {
+            "interactive": true,
+            "command": ["bash", "-i"]
+          },
+          "startupCommands": [
+            "echo 'Starting API server... (simulated)'",
+            "go --version"
+          ]
+        },
+        {
+          "paneTags": { "role": "database-logs" },
+          "startupShell": {
+            "interactive": false,
+            "command": ["bash", "-c", "echo 'Tailing database logs...'; sleep 2"]
+          }
+        }
+      ]
+    }
+  ]
+}
+```
 
 ---
 

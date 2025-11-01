@@ -21,8 +21,8 @@ This roadmap outlines the evolution of **Termplex** as a modular, clarity-first 
 
 - [x] Exported module tracker (API Reference in `README.md`)
 - [ ] ~~Functional changelog engine~~ (Scrapped for now)
-- [ ] Cognitive milestone tagging (e.g. “Shell seeded”, “TTY isolated”)
-- [ ] Session manifest format (`.termplex.json`)
+- [x] Cognitive milestone tagging (e.g. “Shell seeded”, “TTY isolated”)
+- [x] Session manifest format (`.termplex.json`)
 - [ ] Reproducible test harnesses for CI environments
 
 ---
@@ -38,10 +38,10 @@ This roadmap outlines the evolution of **Termplex** as a modular, clarity-first 
 
 ## 🎨 Phase 4: UI & Visualization
 
-- [ ] `termplex-ui`: visual overlays for session/window/pane hierarchy
-- [ ] Live buffer viewer with syntax highlighting
-- [ ] Pane process inspector
-- [ ] Contributor onboarding visualizer
+- [ ] ~~`termplex-ui`: visual overlays for session/window/pane hierarchy~~ (Deferred)
+- [ ] ~~Live buffer viewer with syntax highlighting~~ (Deferred)
+- [ ] ~~Pane process inspector~~ (Deferred)
+- [ ] ~~Contributor onboarding visualizer~~ (Deferred)
 
 ---
 
