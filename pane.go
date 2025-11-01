@@ -10,6 +10,8 @@ type Pane struct {
     SessionName string
     WindowName  string
     PaneIndex   int
+	TrackedSessionID string
+	ShellSessions []*ShellSession
 }
 
 // NewPane creates a new pane in the given window and returns its metadata.
