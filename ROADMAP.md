@@ -7,13 +7,13 @@ This roadmap outlines the evolution of **Termplex** as a modular, clarity-first 
 ## ✅ Phase 1: Core Orchestration Primitives
 
 - [x] `RunTmux(args...)`: raw command executor
-- [x] `NewSession(name)`: create detached tmux session
-- [x] `NewWindow(session)`: spawn window in session
-- [x] `NewPane(window)`: create pane in window
+- [x] `NewSession(name)`: create detached `tmux` session
+- [x] `NewWindow(session)`: spawn window in session (implicitly created)
+- [x] `NewPane(window)`: create pane in window via `split-window`
 - [x] `SendKeys(target, cmd)`: send keystrokes to pane
 - [x] `StartShell(target, path)`: seed shell in pane
 - [x] `GetPanePath(target)`: query working directory
-- [ ] `CapturePane(target)`: capture visible buffer contents
+- [x] `CapturePane(target)`: capture visible buffer contents
 - [ ] `PipePane(target, path)`: stream pane output to file
 
 ---

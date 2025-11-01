@@ -15,8 +15,8 @@ func NewPaneManager(paneID string) *PaneManager {
 	return &PaneManager{
 		ID:                   paneID,
 		CreatedAt:            time.Now(),
-		Tags:                 make(map[string]string),
-		NonInteractiveShells: make([]*shell.ShellSession, 0),
+		Tags:                 make(map[string]string), // A map is not a slice, so it remains.
+		NonInteractiveShells: nil,
 		OutputChan:           make(chan PaneOutput, 100), // Buffered channel
 		closeChan:            make(chan struct{}),
 	}

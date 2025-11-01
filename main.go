@@ -26,7 +26,7 @@ func main() {
 	if err != nil {
 		panic(fmt.Sprintf("Failed to add window: %v", err))
 	}
-	wm, _ := sm.Windows[windowID]
+	wm := sm.Windows[windowID]
 
 	// 4. Add a Pane to the Window
 	paneID, err := wm.AddPane()

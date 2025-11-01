@@ -1,5 +1,14 @@
 # 📜 Termplex Functional Changelog
 
+## 🚀 `tmux` Backend Implementation
+
+- **`tmux` Package**: Introduced a new `tmux` package to serve as a specific backend for the orchestration engine.
+- **`tmux.SessionManager`**: Implemented a manager to create and terminate real, detached `tmux` sessions.
+- **`tmux.Pane`**: Represents a `tmux` pane, with methods like `SendKeys` and `Capture` to interact with it via `tmux` commands.
+- **Integration Test**: Added a `tmux`-specific integration test (`TestTmuxBackendLifecycle`) that validates the entire lifecycle against a real `tmux` server, ensuring correctness.
+
+---
+
 ## ✨ Core Architecture Complete
 
 - **`SessionManager`**: Implemented top-level manager for creating and terminating orchestration sessions.

@@ -11,7 +11,7 @@
 
 ## 🧠 Philosophy
 
-- **Layered Architecture**: High-level managers (`Window`, `Pane`) control the lifecycle of low-level, self-contained `Shell` processes.
+- **Layered Architecture**: A generic orchestration engine (`session`, `window`, `pane`, `shell`) provides the core logic, while specific backends (like `tmux`) implement the details.
 - **Clarity-first abstraction**: Wraps raw `tmux` commands with minimal, intention-revealing helpers
 - **Process introspection**: Query pane state, working directories, and buffer contents with precision
 - **Composable primitives**: Built for integration with Termplex’s session manager, changelog engine, and contributor overlays
@@ -26,7 +26,7 @@
 | `window`        | Manages a collection of panes, representing a logical workspace.                                 |
 | `pane`          | Manages a single view that can contain one interactive shell and multiple background processes.    |
 | `shell`         | Provides low-level, stateless utilities for spawning, interacting with, and terminating OS processes (`exec.Cmd`). |
-| `tmux`          | (Future) Provides a specific implementation for orchestrating shells within a `tmux` environment. |
+| `tmux`          | Provides a specific backend for orchestrating shells within a real `tmux` server environment.      |
 
 This design separates the "what" (the state of windows and panes) from the "how" (the underlying process management), allowing for flexible and testable orchestration.
 
@@ -36,7 +36,7 @@ This design separates the "what" (the state of windows and panes) from the "how"
 
 ## 🚀 Getting Started
 
-To see the architecture in action, you can run the demonstration file:
+To see the generic orchestration engine in action, you can run the main demonstration file:
 
 ```bash
 go run ./main.go
