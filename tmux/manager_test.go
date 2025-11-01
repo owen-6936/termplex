@@ -2,11 +2,11 @@ package tmux_test
 
 import (
 	"fmt"
-	"os/exec"
 	"strings"
 	"testing"
 	"time"
 
+	"github.com/owen-6936/termplex/testenv"
 	"github.com/owen-6936/termplex/tmux"
 )
 
@@ -15,9 +15,7 @@ import (
 // capturing output, and terminating the session.
 func TestTmuxBackendLifecycle(t *testing.T) {
 	// Skip this test if tmux is not installed.
-	if !isTmuxAvailable() {
-		t.Skip("tmux command not found, skipping integration test")
-	}
+	testenv.SkipIfNoTmux(t)
 
 	// 1. Create a new, detached tmux session with a unique name for this test run.
 	sessionName := fmt.Sprintf("termplex-test-%d", time.Now().UnixNano())
@@ -67,10 +65,4 @@ func TestTmuxBackendLifecycle(t *testing.T) {
 	if err != nil || !strings.Contains(output1, "output from pane 1") {
 		t.Errorf("Expected output from pane 1, but got: %q (err: %v)", output1, err)
 	}
-}
-
-// isTmuxAvailable checks if the tmux command exists in the system's PATH.
-func isTmuxAvailable() bool {
-	_, err := exec.LookPath("tmux")
-	return err == nil
 }
