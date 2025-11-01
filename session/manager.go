@@ -36,8 +36,8 @@ func (sm *SessionManager) CreateSession(name string, tags map[string]string) (st
 		ID:         id,
 		Name:       name,
 		CreatedAt:  time.Now(),
-		Tags:       tags,
-		WindowRefs: make(map[string]bool),
+		Tags:       tags,                  // A map is not a slice, so it remains.
+		WindowRefs: make(map[string]bool), // A map is not a slice, so it remains.
 	}
 
 	fmt.Printf("🧠 Session created: %s (%s)\n", id, name)

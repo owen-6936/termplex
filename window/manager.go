@@ -43,7 +43,7 @@ func (wm *WindowManager) GetPane(paneID string) (*PaneManager, bool) {
 func (wm *WindowManager) TerminateWindow() {
 	// Create a slice of pane IDs to iterate over, as deleting from a map
 	// while iterating over it is not safe.
-	paneIDs := make([]string, 0, len(wm.Panes))
+	var paneIDs []string
 	for id := range wm.Panes {
 		paneIDs = append(paneIDs, id)
 	}

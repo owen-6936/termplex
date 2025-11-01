@@ -21,7 +21,7 @@ func TestPaneOutputMultiplexing(t *testing.T) {
 	expectedMessageCount := numShells * 2
 
 	// A map to track the unique outputs we expect to receive.
-	expectedOutputs := make(map[string]bool)
+	expectedOutputs := make(map[string]bool) // A map is not a slice, so it remains.
 	for i := 0; i < numShells; i++ {
 		expectedOutputs[fmt.Sprintf("stdout-from-shell-%d", i)] = true
 		expectedOutputs[fmt.Sprintf("stderr-from-shell-%d", i)] = true
@@ -48,7 +48,7 @@ func TestPaneOutputMultiplexing(t *testing.T) {
 
 	// 3. Concurrently, consume messages from the multiplexed output channel.
 	receivedCount := 0
-	receivedOutputs := make(map[string]bool)
+	receivedOutputs := make(map[string]bool) // A map is not a slice, so it remains.
 	timeout := time.After(5 * time.Second)
 
 	for receivedCount < expectedMessageCount {
