@@ -47,9 +47,9 @@ This roadmap outlines the evolution of **Termplex** as a modular, clarity-first 
 
 ## 🌐 Phase 5: Language & Documentation
 
-- [ ] Multilingual UI support (Chinese + 2–3 additional languages)
-- [ ] Clarity-first documentation with onboarding flows
-- [ ] Visual glossary for tmux hierarchy (session → window → pane → process)
+- [ ] ~~Multilingual UI support~~ (Not applicable to the core library; would apply to future UI/CLI components)
+- [x] Clarity-first documentation with onboarding flows
+- [x] Visual glossary for `tmux` hierarchy (session → window → pane → process)
 
 ---
 
