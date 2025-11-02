@@ -14,11 +14,11 @@ func TestWindowLifecycle(t *testing.T) {
 	}
 
 	// 2. Add a couple of panes to the window.
-	paneID1, err := wm.AddPane()
+	paneID1, err := wm.AddPane("test-pane-1")
 	if err != nil {
 		t.Fatalf("Failed to add first pane: %v", err)
 	}
-	paneID2, err := wm.AddPane()
+	paneID2, err := wm.AddPane("test-pane-2")
 	if err != nil {
 		t.Fatalf("Failed to add second pane: %v", err)
 	}

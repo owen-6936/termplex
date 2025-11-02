@@ -20,6 +20,7 @@ type PaneOutput struct {
 // It can host one interactive shell and multiple non-interactive shells.
 type PaneManager struct {
 	ID               string
+	Name             string // A user-defined name for easier targeting.
 	CreatedAt        time.Time
 	Shells           *shell.ShellManager // Each pane now has its own dedicated shell manager.
 	InteractiveShell *shell.ShellSession

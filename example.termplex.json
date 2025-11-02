@@ -12,6 +12,7 @@
       "panes": [
         {
           "paneTags": {
+            "paneName": "api-server",
             "role": "api-server"
           },
           "startupShell": {
@@ -25,6 +26,7 @@
         },
         {
           "paneTags": {
+            "paneName": "db-logger",
             "role": "database-logs"
           },
           "startupShell": {

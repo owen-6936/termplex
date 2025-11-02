@@ -23,6 +23,7 @@ This roadmap outlines the evolution of **Termplex** as a modular, clarity-first 
 - [ ] ~~Functional changelog engine~~ (Scrapped for now)
 - [x] Cognitive milestone tagging (e.g. “Shell seeded”, “TTY isolated”)
 - [x] Session manifest format (`.termplex.json`)
+- [x] Named panes for direct targeting via manifest
 - [x] Reproducible test harnesses for CI environments
 
 ---

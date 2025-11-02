@@ -8,6 +8,15 @@ import (
 	"time"
 )
 
+// PaneOutput represents a piece of output from a shell within a pane,
+// providing context about its origin.
+type PaneOutput struct {
+	ShellID   string
+	Timestamp time.Time
+	Data      []byte
+	IsStderr  bool
+}
+
 // ShellSession represents an active, managed shell process.
 // It holds references to the process's I/O streams and buffers for capturing output.
 type ShellSession struct {

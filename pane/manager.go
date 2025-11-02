@@ -1,8 +1,6 @@
 package pane
 
 import (
-	"bytes"
-	"errors"
 	"fmt"
 	"sync"
 	"time"
@@ -11,9 +9,10 @@ import (
 )
 
 // NewPaneManager initializes a new pane with a unique ID.
-func NewPaneManager(paneID string) *PaneManager {
+func NewPaneManager(paneID, name string) *PaneManager {
 	pm := &PaneManager{
 		ID:        paneID,
+		Name:      name,
 		CreatedAt: time.Now(),
 		// Each pane gets its own dedicated shell manager.
 		Shells:     shell.NewShellManager(nil),
@@ -22,14 +21,19 @@ func NewPaneManager(paneID string) *PaneManager {
 		closeChan:  make(chan struct{}),
 	}
 	pm.tagsCond = sync.NewCond(&pm.tagsMu)
+	// Start a single goroutine to forward all output from the shell manager.
+	go pm.forwardShellOutput()
 	return pm
 }
 
 // SpawnShell creates and registers a new shell process within the pane.
 func (pm *PaneManager) SpawnShell(interactive bool, command ...string) (*shell.ShellSession, error) {
 	if interactive {
+		// If an interactive shell already exists, gracefully terminate it before spawning the new one.
 		if pm.InteractiveShell != nil {
-			return nil, errors.New("pane already has an interactive shell")
+			fmt.Printf("🔄 Replacing existing interactive shell %s\n", pm.InteractiveShell.ID)
+			// Use a 5-second grace period as suggested.
+			_, _ = pm.TerminateShell(pm.InteractiveShell.ID, 5*time.Second)
 		}
 	}
 
@@ -39,31 +43,33 @@ func (pm *PaneManager) SpawnShell(interactive bool, command ...string) (*shell.S
 		return nil, fmt.Errorf("failed to spawn shell via manager: %w", err)
 	}
 
-	// Define custom handlers that forward output to the pane's multiplexed channel.
-	stdoutHandler := func(output []byte) {
-		select {
-		case pm.OutputChan <- PaneOutput{ShellID: newShell.ID, Timestamp: time.Now(), Data: bytes.Clone(output)}:
-		case <-pm.closeChan: // Avoid blocking if the pane is terminated.
-		}
-	}
-
-	stderrHandler := func(output []byte) {
-		// Send to the combined stream, marked as stderr.
-		select {
-		case pm.OutputChan <- PaneOutput{ShellID: newShell.ID, Timestamp: time.Now(), Data: bytes.Clone(output), IsStderr: true}:
-		case <-pm.closeChan:
-		}
-	}
-
-	// Start reading from the shell's pipes using our custom handlers.
-	newShell.StartReading(stdoutHandler, stderrHandler)
-
 	if interactive {
 		pm.InteractiveShell = newShell
 	}
 	// The shell manager already prints a spawn message.
 
 	return newShell, nil
+}
+
+// forwardShellOutput listens to the dedicated shell manager's output channel
+// and forwards it to the pane's own channel. This is the new, clean abstraction.
+func (pm *PaneManager) forwardShellOutput() {
+	for {
+		select {
+		case output, ok := <-pm.Shells.OutputChan:
+			if !ok {
+				return // ShellManager's channel was closed.
+			}
+			// Convert shell.PaneOutput to pane.PaneOutput
+			pm.OutputChan <- PaneOutput{
+				ShellID:   output.ShellID,
+				Timestamp: output.Timestamp,
+				Data:      output.Data,
+				IsStderr:  output.IsStderr}
+		case <-pm.closeChan:
+			return
+		}
+	}
 }
 
 // AddTag safely adds or updates a tag on the pane and notifies any waiting listeners.
@@ -107,9 +113,20 @@ func (pm *PaneManager) WaitForTag(key, value string, timeout time.Duration) erro
 	}
 }
 
+// SendCommand delegates to the pane's shell manager to send a command to a specific shell.
+func (pm *PaneManager) SendCommand(shellID, command string) error {
+	_, err := pm.Shells.SendCommand(shellID, command)
+	return err
+}
+
 // TerminateShell attempts a graceful shutdown of a specific shell session.
 func (pm *PaneManager) TerminateShell(shellID string, gracePeriod time.Duration) (bool, error) {
 	// Delegate termination to the pane's shell manager.
+	// Also, check if the shell being terminated is the active interactive one.
+	if pm.InteractiveShell != nil && pm.InteractiveShell.ID == shellID {
+		pm.InteractiveShell = nil
+	}
+
 	return true, pm.Shells.TerminateShell(shellID)
 }
 
