@@ -21,14 +21,14 @@ func NewWindowManager(name string, tags map[string]string) *WindowManager {
 }
 
 // AddPane creates and registers a new pane in the window.
-func (wm *WindowManager) AddPane() (string, error) {
+func (wm *WindowManager) AddPane(name string) (string, error) {
 	paneID := uuid.New().String()
 
 	if _, exists := wm.Panes[paneID]; exists {
 		return "", errors.New("pane ID collision")
 	}
 
-	wm.Panes[paneID] = pane.NewPaneManager(paneID)
+	wm.Panes[paneID] = pane.NewPaneManager(paneID, name)
 	fmt.Printf("🪞 Pane created: %s in window %s\n", paneID, wm.ID)
 	return paneID, nil
 }
@@ -37,6 +37,17 @@ func (wm *WindowManager) AddPane() (string, error) {
 func (wm *WindowManager) GetPane(paneID string) (*PaneManager, bool) {
 	pane, exists := wm.Panes[paneID]
 	return pane, exists
+}
+
+// GetPaneByName retrieves the first pane that matches the given name.
+// Note: Pane names are not guaranteed to be unique within a window.
+func (wm *WindowManager) GetPaneByName(name string) (*PaneManager, bool) {
+	for _, p := range wm.Panes {
+		if p.Name == name {
+			return p, true
+		}
+	}
+	return nil, false
 }
 
 // TerminateWindow cleans up all panes in the window.

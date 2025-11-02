@@ -17,7 +17,7 @@
 - **Layered Architecture**: A generic orchestration engine (`session`, `window`, `pane`, `shell`) provides the core logic, while specific backends (like `tmux`) implement the details.
 - **Clarity-first abstraction**: Wraps raw `tmux` commands with minimal, intention-revealing helpers
 - **Process Introspection**: Provides direct access to shell I/O streams and output buffers.
-- **Composable primitives**: Built for integration with Termplex’s session manager, changelog engine, and contributor overlays
+- **Robust I/O**: Uses pseudo-terminals (PTY) for interactive shells to ensure correct TTY behavior, while being fully thread-safe for concurrent operations.
 - **CI-safe and testable**: Supports detached sessions, shell seeding, and robust guards for non-interactive environments
 
 ---
@@ -31,11 +31,13 @@
 | `shell`         | Provides low-level, stateless utilities for spawning, interacting with, and terminating OS processes (`exec.Cmd`). |
 | `tmux`          | Provides a specific backend for orchestrating shells within a real `tmux` server environment.      |
 
+view the full symbol documentation at [API Reference](API.md)
+
 This design separates the "what" (the state of windows and panes) from the "how" (the underlying process management), allowing for flexible and testable orchestration.
 
 ![Termplex Go Architecture](termplex-design.svg)
 
-For a conceptual overview of the `tmux` object model, see the Visual Glossary for the `tmux` Hierarchy.
+For a conceptual overview of the `tmux` object model, see the Visual Glossary for the [`tmux` Hierarchy](tmux_hierarchy.md).
 
 ---
 
@@ -50,7 +52,7 @@ go get github.com/owen-6936/termplex
 Import it in your Go project:
 
 ```go
-import "github.com/nexicore/termplex/tmux"
+import "github.com/owen-6936/termplex/tmux"
 ```
 
 ---
@@ -114,4 +116,4 @@ sessionID, err := sm.CreateSessionFromManifest("path/to/your/manifest.json")
 
 ## 📚 License
 
-MIT © 2025 Georgiy Komarov & Nexicore Digitals
+MIT © 2025 Owen Erhabor

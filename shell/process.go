@@ -18,33 +18,41 @@ func (s *ShellSession) StartReading(
 	// Goroutine for stdout
 	go func() {
 		defer s.Stdout.Close()
-		buf := make([]byte, 1024)
+		// In a PTY, stdout and stderr are the same file. The stderr handler
+		// will be called for all output in this case.
+		handler := stdoutHandler
+		if s.Stdout == s.Stderr {
+			handler = stderrHandler
+		}
+
 		for {
+			buf := make([]byte, 1024)
 			n, err := s.Stdout.Read(buf)
 			if n > 0 {
-				stdoutHandler(buf[:n])
+				handler(buf[:n])
 			}
 			if err != nil {
-				if err != io.EOF {
-					fmt.Printf("Error reading stdout from session %s: %v\n", s.ID, err)
+				// Don't print an error if the file is intentionally closed.
+				if err != io.EOF && !strings.Contains(err.Error(), "file already closed") {
+					fmt.Printf("Error reading from session %s: %v\n", s.ID, err)
 				}
 				return
 			}
 		}
 	}()
 
-	// Goroutine for stderr
-	if s.Stderr != nil {
+	// Only start a separate stderr goroutine if it's a different pipe.
+	if s.Stderr != nil && s.Stderr != s.Stdout {
 		go func() {
 			defer s.Stderr.Close()
-			buf := make([]byte, 1024)
 			for {
+				buf := make([]byte, 1024)
 				n, err := s.Stderr.Read(buf)
 				if n > 0 {
 					stderrHandler(buf[:n])
 				}
 				if err != nil {
-					if err != io.EOF {
+					if err != io.EOF && !strings.Contains(err.Error(), "file already closed") {
 						fmt.Printf("Error reading stderr from session %s: %v\n", s.ID, err)
 					}
 					return

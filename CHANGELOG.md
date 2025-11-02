@@ -1,5 +1,14 @@
 # 📜 Termplex Functional Changelog
 
+## 🚀 Robust Interactive Shells & Concurrency
+
+- **PTY for Interactive Shells**: Refactored the `shell` package to use a pseudo-terminal (PTY) via `github.com/creack/pty` for all interactive shells. This provides a real TTY environment, ensuring correct I/O behavior and eliminating hangs when running multiple tests concurrently.
+- **Concurrency Safety**: Implemented mutex locking in the `ShellManager` to make it thread-safe, resolving `concurrent map writes` errors when spawning multiple shells in parallel.
+- **Intelligent I/O Handling**: The `shell.StartReading` function is now smarter, detecting when `stdout` and `stderr` point to the same PTY device and launching only one reading goroutine to prevent race conditions and "file already closed" errors.
+- **Graceful Interactive Shell Replacement**: The `PaneManager` now intelligently handles requests to spawn a new interactive shell when one already exists. It gracefully terminates the old shell before creating the new one, rather than erroring out.
+
+---
+
 ## 📄 Session Manifest Support
 
 - **Declarative Sessions**: Implemented support for `.termplex.json` manifest files, allowing entire sessions, windows, panes, and startup commands to be defined declaratively.

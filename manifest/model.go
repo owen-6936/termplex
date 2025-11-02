@@ -17,6 +17,7 @@ type WindowManifest struct {
 
 // PaneManifest describes a single pane to be created within a window.
 type PaneManifest struct {
+	PaneName        string            `json:"paneName,omitempty"`
 	PaneTags        map[string]string `json:"paneTags"`
 	StartupShell    ShellManifest     `json:"startupShell"`
 	StartupCommands []string          `json:"startupCommands"`
