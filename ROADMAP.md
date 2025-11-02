@@ -57,9 +57,8 @@ This roadmap outlines the evolution of **Termplex** as a modular, clarity-first 
 ## 📦 Phase 6: Packaging & Distribution
 
 - [ ] CLI wrapper (`termplex run`, `termplex inspect`)
-- [ ] Go module release (`github.com/nexicore/termplex`)
+- [x] Go module release (`github.com/owen-6936/termplex`)
 - [x] GitHub Actions integration
-- [ ] Contributor badge system (optional)
 
 ---
 
